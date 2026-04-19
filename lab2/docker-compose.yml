@@ -1,0 +1,10 @@
+services:
+  transport-auth:
+    build: .
+    container_name: transport-auth
+    ports:
+      - "8888:8888"
+    env_file:
+      - .env.example
+    volumes:
+      - ./data:/app/data

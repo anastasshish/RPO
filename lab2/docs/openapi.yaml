@@ -1,0 +1,429 @@
+openapi: 3.0.3
+info:
+  title: Transport Card Payment Authorization API
+  version: "1.0"
+servers:
+  - url: https://localhost:8888/api/v1
+paths:
+  /auth/login:
+    post:
+      summary: Login and receive JWT
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                login:
+                  type: string
+                password:
+                  type: string
+              required: [login, password]
+      responses:
+        "200":
+          description: JWT token
+  /terminals:
+    get:
+      summary: List terminals
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Terminals list
+    post:
+      summary: Create terminal (admin only)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                serial_number:
+                  type: string
+                address:
+                  type: string
+                name:
+                  type: string
+              required: [serial_number, address, name]
+      responses:
+        "201":
+          description: Created
+  /terminals/{id}:
+    put:
+      summary: Update terminal (admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                serial_number:
+                  type: string
+                address:
+                  type: string
+                name:
+                  type: string
+              required: [serial_number, address, name]
+      responses:
+        "200":
+          description: Updated
+    delete:
+      summary: Delete terminal (admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Deleted
+  /cards:
+    get:
+      summary: List cards
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Cards list
+    post:
+      summary: Create card
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                card_number:
+                  type: string
+                  description: Globally unique across all users (enforced by DB)
+                balance:
+                  type: number
+                blocked:
+                  type: boolean
+                owner_name:
+                  type: string
+                key_id:
+                  type: integer
+                user_id:
+                  type: integer
+                  description: Optional for admin, ignored for regular user
+              required: [card_number, balance, blocked, owner_name, key_id]
+      responses:
+        "201":
+          description: Created
+  /cards/{id}:
+    put:
+      summary: Update card
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                card_number:
+                  type: string
+                  description: Globally unique across all users (enforced by DB)
+                balance:
+                  type: number
+                blocked:
+                  type: boolean
+                owner_name:
+                  type: string
+                key_id:
+                  type: integer
+                user_id:
+                  type: integer
+                  description: Optional for admin, ignored for regular user
+              required: [card_number, balance, blocked, owner_name, key_id]
+      responses:
+        "200":
+          description: Updated
+    delete:
+      summary: Delete card
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Deleted
+  /transactions:
+    get:
+      summary: List transactions
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Transactions list
+    post:
+      summary: Create transaction
+      description: If approved is true, amount must not exceed card balance; balance is debited.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                amount:
+                  type: number
+                card_number:
+                  type: string
+                terminal_id:
+                  type: integer
+                approved:
+                  type: boolean
+              required: [amount, card_number, terminal_id, approved]
+      responses:
+        "201":
+          description: Created
+  /transactions/{id}:
+    put:
+      summary: Update transaction
+      description: Adjusts card balances when approved flag or amount changes.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                amount:
+                  type: number
+                card_number:
+                  type: string
+                terminal_id:
+                  type: integer
+                approved:
+                  type: boolean
+              required: [amount, card_number, terminal_id, approved]
+      responses:
+        "200":
+          description: Updated
+    delete:
+      summary: Delete transaction
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Deleted
+  /users:
+    get:
+      summary: List users
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Users list
+    post:
+      summary: Create user
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                login:
+                  type: string
+                password:
+                  type: string
+                is_admin:
+                  type: boolean
+              required: [login, password, is_admin]
+      responses:
+        "201":
+          description: Created
+  /users/{id}:
+    put:
+      summary: Update user
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                login:
+                  type: string
+                password:
+                  type: string
+                is_admin:
+                  type: boolean
+              required: [login, is_admin]
+      responses:
+        "200":
+          description: Updated
+    delete:
+      summary: Delete user
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Deleted
+  /keys:
+    get:
+      summary: List keys (admin only)
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Keys list
+    post:
+      summary: Create key (admin only)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                key_name:
+                  type: string
+                key_value:
+                  type: string
+              required: [key_name, key_value]
+      responses:
+        "201":
+          description: Created
+  /keys/{id}:
+    put:
+      summary: Update key (admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                key_name:
+                  type: string
+                key_value:
+                  type: string
+              required: [key_name, key_value]
+      responses:
+        "200":
+          description: Updated
+    delete:
+      summary: Delete key (admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Deleted
+  /terminal/authorize:
+    post:
+      summary: Authorize payment transaction
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                card_number:
+                  type: string
+                amount:
+                  type: number
+                terminal_serial:
+                  type: string
+              required: [card_number, amount, terminal_serial]
+      responses:
+        "200":
+          description: Authorization result
+  /terminal/keys:
+    get:
+      summary: Get all card keys for terminal
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Keys list
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
